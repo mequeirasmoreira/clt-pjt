@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface FormData {
     cltSalary: number | '';
@@ -40,33 +40,48 @@ export default function Form({ onSubmit }: FormProps) {
     value: number | ''; 
     onChange: (value: number | '') => void;
     placeholder: string;
-  }) => (
-    <div className="relative">
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-      <div className="relative rounded-md shadow-sm">
-        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-          <span className="text-gray-500 sm:text-sm">R$</span>
+  }) => {
+    const prevValue = useRef<number | ''>(); 
+    const [inputValue, setInputValue] = useState(value === '' ? '' : value.toString());
+
+    useEffect(() => {
+      if (value !== prevValue.current) {
+        setInputValue(value === '' ? '' : value.toString());
+        prevValue.current = value; 
+      }
+    }, [value]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = e.target.value.replace(/\D/g, '');
+      setInputValue(newValue);
+
+      if (newValue === '') {
+        onChange('');
+      } else {
+        onChange(parseInt(newValue, 10));
+      }
+    };
+
+    return (
+      <div className="relative">
+        <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+        <div className="relative rounded-md shadow-sm">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+            <span className="text-gray-500 sm:text-sm">R$</span>
+          </div>
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={inputValue}
+            onChange={handleChange}
+            className="block w-full rounded-md border-gray-300 pl-10 pr-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            placeholder={placeholder}
+          />
         </div>
-        <input
-          type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          value={value === '' ? '' : value.toString()}
-          onChange={(e) => {
-            const newValue = e.target.value.replace(/[^\d]/g, '');
-            if (newValue === '') {
-              onChange('');
-            } else {
-              const number = parseInt(newValue, 10);
-              onChange(number);
-            }
-          }}
-          className="block w-full rounded-md border-gray-300 pl-10 pr-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-          placeholder={placeholder}
-        />
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-xl overflow-hidden">
