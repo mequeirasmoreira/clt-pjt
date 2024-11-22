@@ -71,7 +71,7 @@ export async function POST(request: Request) {
         }
       }
     });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { error: 'Failed to calculate' },
       { status: 400 }
