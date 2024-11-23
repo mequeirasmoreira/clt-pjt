@@ -5,25 +5,73 @@ import Forms from './components/Forms';
 import Result from './components/Result';
 
 interface FormData {
-  cltSalary: number | '';
-  pjSalary: number | '';
-  benefits: number | '';
-  healthInsurance: number | '';
-  mealAllowance: number | '';
-  transportAllowance: number | '';
+  // CLT
+  cltSalary: number;
+  cltHoursPerDay: number;
+  cltDaysPerWeek: number;
+  healthInsurance: number;
+  healthInsuranceEmployee: number;
+  mealAllowance: number;
+  transportAllowance: number;
+  useTransportAllowance: boolean;
+  otherBenefits: number;
+  hasThirteenth: boolean;
+  hasVacation: boolean;
+  hasFGTS: boolean;
+  hasProfit: boolean;
+  profitValue: number;
+  
+  // PJ
+  pjSalary: number;
+  pjHoursPerDay: number;
+  pjDaysPerWeek: number;
+  pjVacationDays: number;
+  pjHasThirteenth: boolean;
+  pjTransportCosts: {
+    type: 'car' | 'public' | 'other';
+    distance?: number;
+    fuelPrice?: number;
+    fuelEfficiency?: number;
+    publicTransportCost?: number;
+    otherCost?: number;
+  };
+  pjHealthInsurance: number;
+  pjMealCosts: number;
+  pjCompanyType: 'mei' | 'simples' | 'lucro_presumido';
+  pjHasAccountant: boolean;
+  pjAccountantCost: number;
+  pjHasWorkspace: boolean;
+  pjWorkspaceCost: number;
+  pjHasEquipment: boolean;
+  pjEquipmentCost: number;
 }
 
 export default function Home() {
-  const [result, setResult] = useState(null);
+  const [formData, setFormData] = useState<FormData | null>(() => {
+    // Tenta recuperar dados salvos do localStorage
+    const savedData = localStorage.getItem('form_data');
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      // Converte strings para números
+      Object.keys(parsedData).forEach(key => {
+        if (typeof parsedData[key] === 'string' && !isNaN(Number(parsedData[key]))) {
+          parsedData[key] = Number(parsedData[key]);
+        }
+      });
+      return parsedData;
+    }
+    return null;
+  });
 
-  const handleSubmit = async (data: FormData) => {
-    const response = await fetch('/api/calculate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+  const handleSubmit = (data: FormData) => {
+    // Converte strings para números
+    const numericData = { ...data };
+    Object.keys(numericData).forEach(key => {
+      if (typeof numericData[key] === 'string' && !isNaN(Number(numericData[key]))) {
+        numericData[key] = Number(numericData[key]);
+      }
     });
-    const result = await response.json();
-    setResult(result);
+    setFormData(numericData);
   };
 
   return (
@@ -42,7 +90,7 @@ export default function Home() {
         
         <div className="space-y-8">
           <Forms onSubmit={handleSubmit} />
-          {result && <Result data={result} />}
+          {formData && <Result data={formData} />}
         </div>
       </div>
     </div>
