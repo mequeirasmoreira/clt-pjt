@@ -76,6 +76,19 @@ const Result = ({ data }: ResultProps) => {
     }).format(value);
   };
 
+  const calculateTransportCosts = (costs: TransportCosts): number => {
+    if (costs.type === 'car') {
+      const distance = costs.distance || 0;
+      const fuelPrice = costs.fuelPrice || 0;
+      const efficiency = costs.fuelEfficiency || 1;
+      return (distance * fuelPrice) / efficiency;
+    } else if (costs.type === 'public') {
+      return costs.publicTransportCost || 0;
+    } else {
+      return costs.otherCost || 0;
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -120,17 +133,17 @@ const Result = ({ data }: ResultProps) => {
             Regime PJ
           </h3>
           <div className="space-y-3 text-[hsl(var(--muted-foreground))]">
-            <p>Valor Bruto Mensal: {formatCurrency(data.pjSalary)}</p>
-            <p>Impostos Mensais: {formatCurrency(data.pjSalary * 0.11)}</p>
-            <p>Custos de Transporte: {formatCurrency(data.pjTransportCosts.type === 'car' ? (data.pjTransportCosts.distance * data.pjTransportCosts.fuelPrice / data.pjTransportCosts.fuelEfficiency) : data.pjTransportCosts.publicTransportCost || data.pjTransportCosts.otherCost)}</p>
-            <p>Plano de Saúde: {formatCurrency(data.pjHealthInsurance)}</p>
-            <p>Custos de Alimentação: {formatCurrency(data.pjMealCosts)}</p>
-            <p>Contador: {formatCurrency(data.pjAccountantCost)}</p>
-            <p>Espaço de Trabalho: {formatCurrency(data.pjWorkspaceCost)}</p>
-            <p>Equipamentos: {formatCurrency(data.pjEquipmentCost)}</p>
-            <p>Provisão Férias: {formatCurrency(data.pjVacationDays * data.pjSalary / 30)}</p>
-            <p>Provisão 13º: {formatCurrency(data.pjHasThirteenth ? data.pjSalary : 0)}</p>
-            <p className="font-semibold text-[hsl(var(--foreground))]">Total Anual: {formatCurrency(data.pjSalary * 12)}</p>
+            <p>Valor Bruto Mensal: {formatCurrency(data.pjSalary || 0)}</p>
+            <p>Impostos Mensais: {formatCurrency((data.pjSalary || 0) * 0.11)}</p>
+            <p>Custos de Transporte: {formatCurrency(calculateTransportCosts(data.pjTransportCosts))}</p>
+            <p>Plano de Saúde: {formatCurrency(data.pjHealthInsurance || 0)}</p>
+            <p>Custos de Alimentação: {formatCurrency(data.pjMealCosts || 0)}</p>
+            <p>Contador: {formatCurrency(data.pjAccountantCost || 0)}</p>
+            <p>Espaço de Trabalho: {formatCurrency(data.pjWorkspaceCost || 0)}</p>
+            <p>Equipamentos: {formatCurrency(data.pjEquipmentCost || 0)}</p>
+            <p>Provisão Férias: {formatCurrency((data.pjVacationDays || 0) * (data.pjSalary || 0) / 30)}</p>
+            <p>Provisão 13º: {formatCurrency(data.pjHasThirteenth ? (data.pjSalary || 0) : 0)}</p>
+            <p className="font-semibold text-[hsl(var(--foreground))]">Total Anual: {formatCurrency((data.pjSalary || 0) * 12)}</p>
           </div>
         </motion.div>
       </div>
